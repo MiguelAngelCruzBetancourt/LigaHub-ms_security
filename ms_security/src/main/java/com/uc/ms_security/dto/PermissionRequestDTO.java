@@ -22,4 +22,11 @@ public class PermissionRequestDTO {
             message = "El método no puede superar 10 caracteres"
     )
     private String method;
+
+    @NotBlank(message = "El modelo es obligatorio")
+    @Size(
+            max = 255,
+            message = "El modelo no puede superar 255 caracteres"
+    )
+    private String model;
 }

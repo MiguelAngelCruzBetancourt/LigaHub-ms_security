@@ -41,6 +41,12 @@ public class Permission {
     )
     private String method;
 
+    @Column(
+            nullable = false,
+            length = 255
+    )
+    private String model;
+
     @OneToMany(
             mappedBy = "permission",
             fetch = FetchType.LAZY

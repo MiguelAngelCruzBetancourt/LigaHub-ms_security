@@ -21,41 +21,41 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class DatabaseSeeder {
 
     private static final PermissionSeed[] ADMIN_PERMISSIONS = {
-            new PermissionSeed("GET", "/api/users"),
-            new PermissionSeed("POST", "/api/users"),
-            new PermissionSeed("GET", "/api/users/{id}"),
-            new PermissionSeed("PUT", "/api/users/{id}"),
-            new PermissionSeed("DELETE", "/api/users/{id}"),
-            new PermissionSeed("PUT", "/api/users/{id}/status"),
-            new PermissionSeed("GET", "/api/users/{id}/profile"),
-            new PermissionSeed("GET", "/api/users/{id}/detail-with-sessions"),
-            new PermissionSeed("GET", "/api/users/{id}/detail-with-roles"),
-            new PermissionSeed("POST", "/api/users/{id}/profile"),
-            new PermissionSeed("PUT", "/api/users/{id}/profile"),
-            new PermissionSeed("DELETE", "/api/users/{id}/profile"),
-            new PermissionSeed("GET", "/api/roles"),
-            new PermissionSeed("POST", "/api/roles"),
-            new PermissionSeed("GET", "/api/roles/{id}"),
-            new PermissionSeed("PUT", "/api/roles/{id}"),
-            new PermissionSeed("DELETE", "/api/roles/{id}"),
-            new PermissionSeed("GET", "/api/permissions"),
-            new PermissionSeed("POST", "/api/permissions"),
-            new PermissionSeed("GET", "/api/permissions/{id}"),
-            new PermissionSeed("PUT", "/api/permissions/{id}"),
-            new PermissionSeed("DELETE", "/api/permissions/{id}"),
-            new PermissionSeed("GET", "/api/roles/{id}/detail-with-permissions"),
-            new PermissionSeed("GET", "/api/user-roles"),
-            new PermissionSeed("POST", "/api/user-roles"),
-            new PermissionSeed("GET", "/api/user-roles/users/{id}"),
-            new PermissionSeed("GET", "/api/user-roles/roles/{id}"),
-            new PermissionSeed("DELETE", "/api/user-roles/{id}/{id}"),
-            new PermissionSeed("GET", "/api/role-permissions"),
-            new PermissionSeed("POST", "/api/role-permissions"),
-            new PermissionSeed("GET", "/api/role-permissions/roles/{id}"),
-            new PermissionSeed("GET", "/api/role-permissions/permissions/{id}"),
-            new PermissionSeed("DELETE", "/api/role-permissions/{id}/{id}"),
-            new PermissionSeed("GET", "/api/users/{id}/sessions"),
-            new PermissionSeed("DELETE", "/api/users/{id}/sessions/{id}")
+            new PermissionSeed("GET", "/api/users", "User"),
+            new PermissionSeed("POST", "/api/users", "User"),
+            new PermissionSeed("GET", "/api/users/{id}", "User"),
+            new PermissionSeed("PUT", "/api/users/{id}", "User"),
+            new PermissionSeed("DELETE", "/api/users/{id}", "User"),
+            new PermissionSeed("PUT", "/api/users/{id}/status", "User"),
+            new PermissionSeed("GET", "/api/users/{id}/profile", "Profile"),
+            new PermissionSeed("GET", "/api/users/{id}/detail-with-sessions", "User"),
+            new PermissionSeed("GET", "/api/users/{id}/detail-with-roles", "User"),
+            new PermissionSeed("POST", "/api/users/{id}/profile", "Profile"),
+            new PermissionSeed("PUT", "/api/users/{id}/profile", "Profile"),
+            new PermissionSeed("DELETE", "/api/users/{id}/profile", "Profile"),
+            new PermissionSeed("GET", "/api/roles", "Role"),
+            new PermissionSeed("POST", "/api/roles", "Role"),
+            new PermissionSeed("GET", "/api/roles/{id}", "Role"),
+            new PermissionSeed("PUT", "/api/roles/{id}", "Role"),
+            new PermissionSeed("DELETE", "/api/roles/{id}", "Role"),
+            new PermissionSeed("GET", "/api/permissions", "Permission"),
+            new PermissionSeed("POST", "/api/permissions", "Permission"),
+            new PermissionSeed("GET", "/api/permissions/{id}", "Permission"),
+            new PermissionSeed("PUT", "/api/permissions/{id}", "Permission"),
+            new PermissionSeed("DELETE", "/api/permissions/{id}", "Permission"),
+            new PermissionSeed("GET", "/api/roles/{id}/detail-with-permissions", "Role"),
+            new PermissionSeed("GET", "/api/user-roles", "UserRole"),
+            new PermissionSeed("POST", "/api/user-roles", "UserRole"),
+            new PermissionSeed("GET", "/api/user-roles/users/{id}", "UserRole"),
+            new PermissionSeed("GET", "/api/user-roles/roles/{id}", "UserRole"),
+            new PermissionSeed("DELETE", "/api/user-roles/{id}/{id}", "UserRole"),
+            new PermissionSeed("GET", "/api/role-permissions", "RolePermission"),
+            new PermissionSeed("POST", "/api/role-permissions", "RolePermission"),
+            new PermissionSeed("GET", "/api/role-permissions/roles/{id}", "RolePermission"),
+            new PermissionSeed("GET", "/api/role-permissions/permissions/{id}", "RolePermission"),
+            new PermissionSeed("DELETE", "/api/role-permissions/{id}/{id}", "RolePermission"),
+            new PermissionSeed("GET", "/api/users/{id}/sessions", "Session"),
+            new PermissionSeed("DELETE", "/api/users/{id}/sessions/{id}", "Session")
     };
 
     private final UserRepository userRepository;
@@ -83,10 +83,10 @@ public class DatabaseSeeder {
             }
 
             Permission listUsers = findOrCreatePermission(
-                    new PermissionSeed("GET", "/api/users")
+                    new PermissionSeed("GET", "/api/users", "User")
             );
             Permission getUser = findOrCreatePermission(
-                    new PermissionSeed("GET", "/api/users/{id}")
+                    new PermissionSeed("GET", "/api/users/{id}", "User")
             );
             assignPermission(consultantRole, listUsers);
             assignPermission(consultantRole, getUser);
@@ -115,13 +115,19 @@ public class DatabaseSeeder {
     }
 
     private Permission findOrCreatePermission(PermissionSeed seed) {
-        return permissionRepository.findByUrlAndMethod(seed.url(), seed.method())
+        Permission permission = permissionRepository.findByUrlAndMethod(seed.url(), seed.method())
                 .orElseGet(() -> {
-                    Permission permission = new Permission();
-                    permission.setUrl(seed.url());
-                    permission.setMethod(seed.method());
-                    return permissionRepository.save(permission);
+                    Permission created = new Permission();
+                    created.setUrl(seed.url());
+                    created.setMethod(seed.method());
+                    created.setModel(seed.model());
+                    return permissionRepository.save(created);
                 });
+        if (permission.getModel() == null || permission.getModel().isBlank()) {
+            permission.setModel(seed.model());
+            permission = permissionRepository.save(permission);
+        }
+        return permission;
     }
 
     private void assignRole(User user, Role role) {
@@ -146,6 +152,6 @@ public class DatabaseSeeder {
         }
     }
 
-    private record PermissionSeed(String method, String url) {
+    private record PermissionSeed(String method, String url, String model) {
     }
 }
