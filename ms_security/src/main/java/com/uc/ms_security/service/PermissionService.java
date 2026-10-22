@@ -41,6 +41,8 @@ public class PermissionService {
     }
 
     public PermissionResponseDTO create(PermissionRequestDTO dto) {
+        normalize(dto);
+
         if (permissionRepository.existsByUrlAndMethod(
                 dto.getUrl(), dto.getMethod())) {
             throw new ApplicationException(
@@ -74,6 +76,8 @@ public class PermissionService {
 
         Permission permission = findEntityById(id);
 
+        normalize(dto);
+
         if (permissionRepository.existsByUrlAndMethodAndIdNot(
                 dto.getUrl(), dto.getMethod(), id)) {
             throw new ApplicationException(
@@ -100,6 +104,32 @@ public class PermissionService {
         }
 
         permissionRepository.delete(permission);
+    }
+
+    /**
+     * Deja el método y la URL en la forma que usa el autorizador (método en
+     * mayúsculas y parámetros de ruta como {id}), de modo que dos permisos
+     * equivalentes sean el mismo y todo permiso guardado pueda coincidir con
+     * una petición real.
+     */
+    private void normalize(PermissionRequestDTO dto) {
+        dto.setMethod(dto.getMethod().trim().toUpperCase(Locale.ROOT));
+
+        String url = dto.getUrl().trim();
+        if (url.length() > 1 && url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+
+        String[] segments = url.split("/", -1);
+        for (int index = 0; index < segments.length; index++) {
+            String segment = segments[index];
+            boolean isPathParameter = segment.matches("\\{[^}]*}")
+                    || segment.matches(":[A-Za-z_]\\w*");
+            if (isPathParameter) {
+                segments[index] = "{id}";
+            }
+        }
+        dto.setUrl(String.join("/", segments));
     }
 
     private Permission findEntityById(Long id) {

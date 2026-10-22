@@ -1,6 +1,7 @@
 package com.uc.ms_security.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,10 @@ public class PermissionRequestDTO {
     @Size(
             max = 10,
             message = "El método no puede superar 10 caracteres"
+    )
+    @Pattern(
+            regexp = "(?i)^\\s*(GET|POST|PUT|PATCH|DELETE)\\s*$",
+            message = "El método debe ser GET, POST, PUT, PATCH o DELETE"
     )
     private String method;
 
