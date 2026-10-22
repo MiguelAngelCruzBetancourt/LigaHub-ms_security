@@ -50,6 +50,14 @@ public class ProfileService {
         return profileMapper.toResponseDTO(updatedProfile);
     }
 
+    /** Crea el perfil si el usuario no tiene uno; si lo tiene, lo actualiza. */
+    public ProfileResponseDTO save(Long userId, ProfileRequestDTO dto) {
+        if (profileRepository.existsByUserId(userId)) {
+            return update(userId, dto);
+        }
+        return create(userId, dto);
+    }
+
     public ProfileResponseDTO findByUserId(Long userId) {
         return profileMapper.toResponseDTO(findProfile(userId));
     }

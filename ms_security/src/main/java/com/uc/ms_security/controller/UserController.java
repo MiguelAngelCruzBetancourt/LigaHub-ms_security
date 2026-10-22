@@ -5,6 +5,8 @@ import com.uc.ms_security.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -17,8 +19,14 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO create(@Valid @RequestBody CreateUserDTO dto) {
-        return userService.create(dto);
+    public UserResponseDTO create(
+            @Valid @RequestBody CreateUserDTO dto,
+            @AuthenticationPrincipal Jwt jwt) {
+        // Sin sesión = autorregistro: recibe el rol inicial automáticamente.
+        // Con sesión (administrador) los roles los elige quien crea el usuario.
+        return jwt == null
+                ? userService.register(dto)
+                : userService.create(dto);
     }
 
     @GetMapping

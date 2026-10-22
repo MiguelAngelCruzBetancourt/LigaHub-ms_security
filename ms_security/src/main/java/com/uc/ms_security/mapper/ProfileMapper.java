@@ -22,6 +22,8 @@ public class ProfileMapper {
                 dto.getBirthDate()
         );
 
+        applyPhoto(dto, profile);
+
         return profile;
     }
 
@@ -36,6 +38,8 @@ public class ProfileMapper {
         profile.setBirthDate(
                 dto.getBirthDate()
         );
+
+        applyPhoto(dto, profile);
     }
 
     public ProfileResponseDTO toResponseDTO(
@@ -48,7 +52,22 @@ public class ProfileMapper {
         return new ProfileResponseDTO(
                 profile.getId(),
                 profile.getPhone(),
-                profile.getBirthDate()
+                profile.getBirthDate(),
+                profile.getPhotoUrl()
+        );
+    }
+
+    /** null conserva la foto actual; "" la elimina. */
+    private void applyPhoto(
+            ProfileRequestDTO dto,
+            Profile profile) {
+
+        if (dto.getPhotoUrl() == null) {
+            return;
+        }
+
+        profile.setPhotoUrl(
+                dto.getPhotoUrl().isEmpty() ? null : dto.getPhotoUrl()
         );
     }
 }

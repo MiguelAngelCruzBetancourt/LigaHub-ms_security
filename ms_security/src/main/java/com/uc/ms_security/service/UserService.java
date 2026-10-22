@@ -1,15 +1,18 @@
 package com.uc.ms_security.service;
 
 import com.uc.ms_security.dto.*;
+import com.uc.ms_security.entity.Role;
 import com.uc.ms_security.entity.User;
 import com.uc.ms_security.exception.ApplicationException;
 import com.uc.ms_security.exception.ErrorCase;
 import com.uc.ms_security.mapper.UserMapper;
+import com.uc.ms_security.repository.RoleRepository;
 import com.uc.ms_security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +25,36 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final RoleRepository roleRepository;
+
+    private final UserRoleService userRoleService;
+
+    /** Rol que reciben los usuarios que se registran por su cuenta (nombre tal como está en la BD). */
+    private static final String INITIAL_ROLE_NAME = "USUARIO INICIAL";
+
+    /**
+     * Autorregistro: crea el usuario y le asigna el rol inicial en una sola
+     * transacción. Si el rol no existe no se crea el usuario.
+     */
+    @Transactional
+    public UserResponseDTO register(CreateUserDTO dto) {
+        Role initialRole = roleRepository
+                .findByNameIgnoreCase(INITIAL_ROLE_NAME)
+                .orElseThrow(() -> new ApplicationException(
+                        ErrorCase.NOT_FOUND,
+                        "Rol inicial no encontrado: " + INITIAL_ROLE_NAME
+                ));
+
+        UserResponseDTO created = create(dto);
+
+        AssignRoleRequestDTO assignment = new AssignRoleRequestDTO();
+        assignment.setUserId(created.getId());
+        assignment.setRoleId(initialRole.getId());
+        userRoleService.assign(assignment);
+
+        return created;
+    }
 
     public UserResponseDTO create(CreateUserDTO dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {

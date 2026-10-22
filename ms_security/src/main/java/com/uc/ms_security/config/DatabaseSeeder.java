@@ -33,6 +33,8 @@ public class DatabaseSeeder {
             new PermissionSeed("POST", "/api/users/{id}/profile", "Profile"),
             new PermissionSeed("PUT", "/api/users/{id}/profile", "Profile"),
             new PermissionSeed("DELETE", "/api/users/{id}/profile", "Profile"),
+            new PermissionSeed("GET", "/api/profile/me", "Profile"),
+            new PermissionSeed("PUT", "/api/profile/me", "Profile"),
             new PermissionSeed("GET", "/api/roles", "Role"),
             new PermissionSeed("POST", "/api/roles", "Role"),
             new PermissionSeed("GET", "/api/roles/{id}", "Role"),
@@ -90,6 +92,16 @@ public class DatabaseSeeder {
             );
             assignPermission(consultantRole, listUsers);
             assignPermission(consultantRole, getUser);
+
+            // Rol de los usuarios que se autorregistran: puede gestionar su propio perfil.
+            // No se crea aquí; si todavía no existe, se asigna desde la matriz de permisos.
+            roleRepository.findByNameIgnoreCase("USUARIO INICIAL")
+                    .ifPresent(initialRole -> {
+                        assignPermission(initialRole, findOrCreatePermission(
+                                new PermissionSeed("GET", "/api/profile/me", "Profile")));
+                        assignPermission(initialRole, findOrCreatePermission(
+                                new PermissionSeed("PUT", "/api/profile/me", "Profile")));
+                    });
         };
     }
 

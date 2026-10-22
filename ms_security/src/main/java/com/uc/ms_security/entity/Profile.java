@@ -33,6 +33,12 @@ public class Profile {
     )
     private LocalDate birthDate;
 
+    @Column(
+            name = "photo_url",
+            columnDefinition = "MEDIUMTEXT"
+    )
+    private String photoUrl;
+
     @OneToOne(
             fetch = FetchType.LAZY //Carga por partes, osea solo cargar el perfil cuando se llame al usuario
     )

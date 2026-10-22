@@ -45,6 +45,9 @@ public class SecurityConfig {
                 // Registro público: crea el usuario sin roles ni permisos.
                 .requestMatchers(HttpMethod.POST, "/api/users")
                 .permitAll()
+                // Identidad y permisos propios: basta con tener un token válido.
+                .requestMatchers(HttpMethod.GET, "/api/auth/me")
+                .authenticated()
                 .anyRequest()
                 .access(dynamicAuthorizationManager)
             )
