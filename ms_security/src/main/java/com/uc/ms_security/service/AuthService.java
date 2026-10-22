@@ -31,6 +31,13 @@ public class AuthService {
             throw unauthorized();
         }
 
+        if (!user.isActive()) {
+            throw new ApplicationException(
+                    ErrorCase.UNAUTHORIZED,
+                    "El usuario está desactivado"
+            );
+        }
+
         return jwtService.generateToken(user);
     }
 

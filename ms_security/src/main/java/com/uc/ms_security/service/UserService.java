@@ -83,6 +83,11 @@ public class UserService {
         User updatedUser = userRepository.save(user);
         return userMapper.toResponseDTO(updatedUser);
     }
+    public UserResponseDTO updateStatus(Long id, UpdateUserStatusDTO dto) {
+        User user = findUser(id);
+        user.setActive(dto.getActive());
+        return userMapper.toResponseDTO(userRepository.save(user));
+    }
     public void delete(Long id) {
         User user = findUser(id);
         userRepository.delete(user);

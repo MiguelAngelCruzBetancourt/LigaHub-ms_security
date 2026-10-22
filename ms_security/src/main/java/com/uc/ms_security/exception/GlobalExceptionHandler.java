@@ -1,5 +1,6 @@
 package com.uc.ms_security.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -31,6 +32,19 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(status)
+                .body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(
+            DataIntegrityViolationException exception) {
+
+        Map<String, String> error = new LinkedHashMap<>();
+        error.put("errorCase", ErrorCase.ALREADY_EXISTS.name());
+        error.put("message", "El registro ya existe o viola una restricción de la base de datos");
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(error);
     }
 

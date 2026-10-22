@@ -26,6 +26,7 @@ public class DatabaseSeeder {
             new PermissionSeed("GET", "/api/users/{id}"),
             new PermissionSeed("PUT", "/api/users/{id}"),
             new PermissionSeed("DELETE", "/api/users/{id}"),
+            new PermissionSeed("PUT", "/api/users/{id}/status"),
             new PermissionSeed("GET", "/api/users/{id}/profile"),
             new PermissionSeed("GET", "/api/users/{id}/detail-with-sessions"),
             new PermissionSeed("GET", "/api/users/{id}/detail-with-roles"),

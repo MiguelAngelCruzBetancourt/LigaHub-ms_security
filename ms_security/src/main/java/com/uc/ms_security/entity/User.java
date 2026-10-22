@@ -2,6 +2,7 @@ package com.uc.ms_security.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -39,6 +40,10 @@ public class User {
             length = 255
     )
     private String password;
+
+    @Column(nullable = false)
+    @ColumnDefault("1")
+    private boolean active = true;
 
     @OneToOne(
             mappedBy = "user",
